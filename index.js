@@ -14,7 +14,7 @@ const hodSchema = new mongoose.Schema({
     address: String,
     gender: String,
     department: String,
-    phone: String,
+    phone: String,s
     email: String,
   });
   const HOD = mongoose.model('HOD', hodSchema);
