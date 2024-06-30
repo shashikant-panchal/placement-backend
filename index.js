@@ -2,9 +2,10 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const Student = require("./models/student");
+require("dotenv").config(); // Load environment variables from .env file
 
 const app = express();
-const PORT = 5000; // Choose your preferred port
+const PORT = process.env.PORT || 5000; // Use port from .env or default to 5000
 
 // Middleware
 app.use(bodyParser.json());
@@ -20,18 +21,25 @@ const hodSchema = new mongoose.Schema({
 const HOD = mongoose.model("HOD", hodSchema);
 
 // Connect to MongoDB
-mongoose.connect("mongodb+srv://cp1:cp1@cp1.7vpcddf.mongodb.net/", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose
+  .connect(process.env.MONGODB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });
 
 // Routes
-// Route to add a new student
 
 app.get("/", (req, res) => {
   res.send("Server in Running.......");
 });
 
+// Route to add a new student
 app.post("/api/students", async (req, res) => {
   const { name, address, gender, dob, phone, branch } = req.body;
   try {
@@ -53,6 +61,7 @@ app.get("/api/students", async (req, res) => {
   }
 });
 
+// HOD Routes
 app.get("/api/hods", async (req, res) => {
   try {
     const hods = await HOD.find();
@@ -84,6 +93,7 @@ app.delete("/api/hods/:id", async (req, res) => {
   }
 });
 
+// Company Schema and Routes
 const companySchema = new mongoose.Schema({
   companyName: String,
   address: String,
@@ -93,10 +103,6 @@ const companySchema = new mongoose.Schema({
 });
 const Company = mongoose.model("Company", companySchema);
 
-// Middleware
-app.use(bodyParser.json());
-
-// Routes
 app.get("/api/companies", async (req, res) => {
   try {
     const companies = await Company.find();
