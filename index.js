@@ -27,6 +27,11 @@ mongoose.connect("mongodb+srv://cp1:cp1@cp1.7vpcddf.mongodb.net/", {
 
 // Routes
 // Route to add a new student
+
+app.get("/", (req, res) => {
+  res.send("Server in Running.......");
+});
+
 app.post("/api/students", async (req, res) => {
   const { name, address, gender, dob, phone, branch } = req.body;
   try {
