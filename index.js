@@ -10,6 +10,61 @@ const PORT = process.env.PORT || 5000; // Use port from .env or default to 5000
 // Middleware
 app.use(bodyParser.json());
 
+const userSchema = new mongoose.Schema({
+  email: {type: String, unique: true},
+  password: String,
+  role: {type: String, enum: ['admin', 'student', 'hod', 'company']},
+});
+const User = mongoose.model('User', userSchema);
+
+app.post('/api/login', async (req, res) => {
+  const {email, password} = req.body;
+
+  try {
+    const user = await User.findOne({email});
+    if (!user) {
+      return res.status(404).json({error: 'User not found'});
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({error: 'Invalid credentials'});
+    }
+
+    res.json({
+      email: user.email,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({error: 'Login failed'});
+  }
+});
+
+async function initializeAdmin() {
+  const adminEmail = 'admin@gmail.com';
+  const adminPassword = 'admin@123';
+
+  try {
+    let admin = await User.findOne({email: adminEmail});
+    if (!admin) {
+      const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      admin = await User.create({
+        email: adminEmail,
+        password: hashedPassword,
+        role: 'admin',
+      });
+      console.log('Admin account created:', admin);
+    } else {
+      console.log('Admin account already exists.');
+    }
+  } catch (err) {
+    console.error('Error initializing admin:', err);
+  }
+}
+
+initializeAdmin().catch(err => console.error('Error initializing admin:', err));
+
 const hodSchema = new mongoose.Schema({
   name: String,
   address: String,
