@@ -7,6 +7,10 @@ const studentSchema = new mongoose.Schema({
   dob: String,
   phone: String,
   branch: String,
+    selected: {
+    type: Boolean,
+    default: false, 
+  }
 });
 
 module.exports = mongoose.model('Student', studentSchema);
