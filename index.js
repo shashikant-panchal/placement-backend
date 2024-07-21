@@ -54,6 +54,21 @@ app.post("/api/students", async (req, res) => {
   }
 });
 
+app.post('/api/selectStudent/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const selectedStudent = await Student.findByIdAndUpdate(id, { selected: true }, { new: true });
+    if (!selectedStudent) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+    res.json(selectedStudent);
+  } catch (error) {
+    console.error('Error selecting student:', error);
+    res.status(500).json({ error: 'Failed to select student' });
+  }
+});
+
+
 // Route to fetch all students
 app.get("/api/students", async (req, res) => {
   console.log("Received request to fetch students");
