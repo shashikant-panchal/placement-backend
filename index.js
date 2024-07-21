@@ -81,28 +81,53 @@ app.get('/api/selectedStudents', async (req, res) => {
 
 
 // Route to fetch all students
-app.get("/api/students", async (req, res) => {
-  console.log("Received request to fetch students");
+// app.get("/api/students", async (req, res) => {
+//   console.log("Received request to fetch students");
+//   try {
+//     const students = await Student.find();
+//     res.json(students);
+//     console.log("Students fetched successfully");
+//   } catch (err) {
+//     console.error("Error fetching students:", err);
+//     res.status(500).json({ message: err.message });
+//   }
+// });
+
+app.get('/api/students', async (req, res) => {
   try {
+    if (req.user.role !== 'student') {
+      return res.status(403).json({error: 'Unauthorized'});
+    }
     const students = await Student.find();
     res.json(students);
-    console.log("Students fetched successfully");
   } catch (err) {
-    console.error("Error fetching students:", err);
-    res.status(500).json({ message: err.message });
+    res.status(500).json({message: err.message});
   }
 });
 
 // HOD Routes
-app.get("/api/hods", async (req, res) => {
-  console.log("Received request to fetch HODs");
+// app.get("/api/hods", async (req, res) => {
+//   console.log("Received request to fetch HODs");
+//   try {
+//     const hods = await HOD.find();
+//     res.json(hods);
+//     console.log("HODs fetched successfully");
+//   } catch (error) {
+//     console.error("Error fetching HODs:", error);
+//     res.status(500).json({ error: "Failed to fetch HODs" });
+//   }
+// });
+
+app.get('/api/hods', async (req, res) => {
   try {
+    if (req.user.role !== 'hod') {
+      return res.status(403).json({error: 'Unauthorized'});
+    }
     const hods = await HOD.find();
     res.json(hods);
-    console.log("HODs fetched successfully");
   } catch (error) {
-    console.error("Error fetching HODs:", error);
-    res.status(500).json({ error: "Failed to fetch HODs" });
+    console.error('Error fetching HODs:', error);
+    res.status(500).json({error: 'Failed to fetch HODs'});
   }
 });
 
@@ -141,15 +166,28 @@ const companySchema = new mongoose.Schema({
 });
 const Company = mongoose.model("Company", companySchema);
 
-app.get("/api/companies", async (req, res) => {
-  console.log("Received request to fetch companies");
+// app.get("/api/companies", async (req, res) => {
+//   console.log("Received request to fetch companies");
+//   try {
+//     const companies = await Company.find();
+//     res.json(companies);
+//     console.log("Companies fetched successfully");
+//   } catch (error) {
+//     console.error("Error fetching companies:", error);
+//     res.status(500).json({ error: "Failed to fetch companies" });
+//   }
+// });
+
+app.get('/api/companies', async (req, res) => {
   try {
+    if (req.user.role !== 'company') {
+      return res.status(403).json({error: 'Unauthorized'});
+    }
     const companies = await Company.find();
     res.json(companies);
-    console.log("Companies fetched successfully");
   } catch (error) {
-    console.error("Error fetching companies:", error);
-    res.status(500).json({ error: "Failed to fetch companies" });
+    console.error('Error fetching companies:', error);
+    res.status(500).json({error: 'Failed to fetch companies'});
   }
 });
 
