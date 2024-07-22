@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const Student = require("./models/student");
+const cors = require("cors");
 require("dotenv").config(); // Load environment variables from .env file
 
 const app = express();
@@ -9,6 +10,7 @@ const PORT = process.env.PORT || 5000; // Use port from .env or default to 5000
 
 // Middleware
 app.use(bodyParser.json());
+app.use(cors());
 
 const hodSchema = new mongoose.Schema({
   name: String,
@@ -54,31 +56,33 @@ app.post("/api/students", async (req, res) => {
   }
 });
 
-app.post('/api/selectStudent/:id', async (req, res) => {
+app.post("/api/selectStudent/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const selectedStudent = await Student.findByIdAndUpdate(id, { selected: true }, { new: true });
+    const selectedStudent = await Student.findByIdAndUpdate(
+      id,
+      { selected: true },
+      { new: true }
+    );
     if (!selectedStudent) {
-      return res.status(404).json({ error: 'Student not found' });
+      return res.status(404).json({ error: "Student not found" });
     }
     res.json(selectedStudent);
   } catch (error) {
-    console.error('Error selecting student:', error);
-    res.status(500).json({ error: 'Failed to select student' });
+    console.error("Error selecting student:", error);
+    res.status(500).json({ error: "Failed to select student" });
   }
 });
 
-app.get('/api/selectedStudents', async (req, res) => {
+app.get("/api/selectedStudents", async (req, res) => {
   try {
     const selectedStudents = await Student.find({ selected: true });
     res.json(selectedStudents);
   } catch (err) {
-    console.error('Error fetching selected students:', err);
-    res.status(500).json({ error: 'Failed to fetch selected students' });
+    console.error("Error fetching selected students:", err);
+    res.status(500).json({ error: "Failed to fetch selected students" });
   }
 });
-
-
 
 // Route to fetch all students
 app.get("/api/students", async (req, res) => {
@@ -92,7 +96,6 @@ app.get("/api/students", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
 
 // HOD Routes
 app.get("/api/hods", async (req, res) => {
