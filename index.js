@@ -135,7 +135,7 @@ app.delete("/api/hods/:id", async (req, res) => {
   }
 });
 
-Company Schema and Routes
+// Company Schema and Routes
 const companySchema = new mongoose.Schema({
   companyName: String,
   address: String,
