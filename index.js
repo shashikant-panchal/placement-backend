@@ -23,17 +23,28 @@ const hodSchema = new mongoose.Schema({
 const HOD = mongoose.model("HOD", hodSchema);
 
 // Connect to MongoDB
-mongoose
-  .connect(process.env.MONGODB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
-  });
+// mongoose
+//   .connect(process.env.MONGODB_URL, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   })
+//   .then(() => {
+//     console.log("Connected to MongoDB");
+//   })
+//   .catch((error) => {
+//     console.error("Error connecting to MongoDB:", error);
+//   });
+
+// MongoDB connection (updated)
+mongoose.connect(process.env.MONGODB_URL, {
+  serverSelectionTimeoutMS: 5000, // Optional timeout for server selection
+})
+.then(() => {
+  console.log("Connected to MongoDB");
+})
+.catch((error) => {
+  console.error("Error connecting to MongoDB:", error);
+});
 
 // Routes
 
@@ -136,6 +147,7 @@ app.delete("/api/hods/:id", async (req, res) => {
 });
 
 // Company Schema and Routes
+
 const companySchema = new mongoose.Schema({
   companyName: String,
   address: String,
