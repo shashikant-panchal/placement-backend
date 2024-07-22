@@ -136,13 +136,29 @@ app.delete("/api/hods/:id", async (req, res) => {
 });
 
 // Company Schema and Routes
+// const companySchema = new mongoose.Schema({
+//   companyName: String,
+//   address: String,
+//   website: String,
+//   phone: String,
+//   email: String,
+// });
+// const Company = mongoose.model("Company", companySchema);
+
 const companySchema = new mongoose.Schema({
   companyName: String,
   address: String,
   website: String,
   phone: String,
   email: String,
+  jobs: [{
+    designation: String,
+    twelfthPercentage: Number,
+    graduationGPA: Number,
+    salaryPackage: Number
+  }]
 });
+
 const Company = mongoose.model("Company", companySchema);
 
 app.get("/api/companies", async (req, res) => {
@@ -166,6 +182,42 @@ app.post("/api/companies", async (req, res) => {
   } catch (error) {
     console.error("Error adding company:", error);
     res.status(500).json({ error: "Failed to add company" });
+  }
+});
+
+app.post('/api/companies/:companyId/jobs', async (req, res) => {
+  const { companyId } = req.params;
+  const { designation, twelfthPercentage, graduationGPA, salaryPackage } = req.body;
+
+  try {
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    company.jobs.push({ designation, twelfthPercentage, graduationGPA, salaryPackage });
+    await company.save();
+    
+    res.status(201).json(company.jobs[company.jobs.length - 1]); // Return the added job
+  } catch (error) {
+    console.error('Error adding job:', error);
+    res.status(500).json({ error: 'Failed to add job' });
+  }
+});
+
+app.get('/api/companies/:companyId/jobs', async (req, res) => {
+  const { companyId } = req.params;
+
+  try {
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    res.json(company.jobs);
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    res.status(500).json({ error: 'Failed to fetch jobs' });
   }
 });
 
