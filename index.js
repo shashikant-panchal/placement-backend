@@ -23,28 +23,17 @@ const hodSchema = new mongoose.Schema({
 const HOD = mongoose.model("HOD", hodSchema);
 
 // Connect to MongoDB
-// mongoose
-//   .connect(process.env.MONGODB_URL, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   })
-//   .then(() => {
-//     console.log("Connected to MongoDB");
-//   })
-//   .catch((error) => {
-//     console.error("Error connecting to MongoDB:", error);
-//   });
-
-// MongoDB connection (updated)
-mongoose.connect(process.env.MONGODB_URL, {
-  serverSelectionTimeoutMS: 5000, // Optional timeout for server selection
-})
-.then(() => {
-  console.log("Connected to MongoDB");
-})
-.catch((error) => {
-  console.error("Error connecting to MongoDB:", error);
-});
+mongoose
+  .connect(process.env.MONGODB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });
 
 // Routes
 
@@ -147,7 +136,6 @@ app.delete("/api/hods/:id", async (req, res) => {
 });
 
 // Company Schema and Routes
-
 const companySchema = new mongoose.Schema({
   companyName: String,
   address: String,
@@ -191,52 +179,6 @@ app.delete("/api/companies/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting company:", error);
     res.status(500).json({ error: "Failed to delete company" });
-  }
-});
-
-const jobSchema = new mongoose.Schema({
-  designation: String,
-  companyName: String,
-  twelfthPercentage: Number,
-  graduationGPA: Number,
-  salaryPackage: Number,
-});
-
-module.exports = mongoose.model('Job', jobSchema);
-
-// Route to add a new job
-app.post('/api/jobs', async (req, res) => {
-  try {
-    const {
-      designation,
-      companyName,
-      twelfthPercentage,
-      graduationGPA,
-      salaryPackage,
-    } = req.body;
-    const newJob = new Job({
-      designation,
-      companyName,
-      twelfthPercentage,
-      graduationGPA,
-      salaryPackage,
-    });
-    await newJob.save();
-    res.status(201).json(newJob);
-  } catch (error) {
-    console.error('Error adding job:', error);
-    res.status(500).json({ error: 'Failed to add job' });
-  }
-});
-
-// Route to fetch all jobs
-app.get('/api/jobs', async (req, res) => {
-  try {
-    const jobs = await Job.find();
-    res.json(jobs);
-  } catch (error) {
-    console.error('Error fetching jobs:', error);
-    res.status(500).json({ error: 'Failed to fetch jobs' });
   }
 });
 
