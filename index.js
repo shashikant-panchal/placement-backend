@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-// const Student = require("./models/student");
+const Student = require("./models/student");
 const cors = require("cors");
 require("dotenv").config(); // Load environment variables from .env file
 
@@ -36,136 +36,64 @@ mongoose
   });
 
 // Routes
-
 app.get("/", (req, res) => {
   res.send("Server in Running........");
 });
 
-
-// Student Schema
-const NewstudentSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  address: String,
-  gender: String,
-  dob: Date,
-  phone: String,
-  branch: String,
-});
-
-// Before saving the student, hash the password
-NewstudentSchema.pre('save', async function (next) {
-  if (this.isModified('password')) {
-    this.password = await bcrypt.hash(this.password, 10);
-  }
-  next();
-});
-
-const Student = mongoose.model('Student', NewstudentSchema);
-
-app.post('/register', async (req, res) => {
+app.post("/api/students", async (req, res) => {
+  console.log("Received request to add student");
+  const { name, address, gender, dob, phone, branch } = req.body;
   try {
-    const { name, email, password, address, gender, dob, phone, branch } = req.body;
-    
-    let student = await Student.findOne({ email });
-    if (student) {
-      return res.status(400).json({ message: 'Student already registered with this email' });
-    }
-
-    student = new Student({ name, email, password, address, gender, dob, phone, branch });
+    const student = new Student({ name, address, gender, dob, phone, branch });
     await student.save();
-
-    res.status(201).json({ message: 'Student registered successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(201).json(student);
+    console.log("Student added successfully");
+  } catch (err) {
+    console.error("Error adding student:", err);
+    res.status(400).json({ message: err.message });
   }
 });
 
-app.get('/students', async (req, res) => {
+app.post("/api/selectStudent/:id", async (req, res) => {
+  const { id } = req.params;
   try {
-    const students = await Student.find({}, { password: 0 });
-    res.status(200).json(students);
+    const selectedStudent = await Student.findByIdAndUpdate(
+      id,
+      { selected: true },
+      { new: true }
+    );
+    if (!selectedStudent) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+    res.json(selectedStudent);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error selecting student:", error);
+    res.status(500).json({ error: "Failed to select student" });
   }
 });
 
-app.post('/login', async (req, res) => {
+app.get("/api/selectedStudents", async (req, res) => {
   try {
-    const { email, password } = req.body;
-    
-    const student = await Student.findOne({ email });
-    if (!student) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
-
-    const isMatch = await bcrypt.compare(password, student.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
-
-    res.status(200).json({ message: 'Login successful' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const selectedStudents = await Student.find({ selected: true });
+    res.json(selectedStudents);
+  } catch (err) {
+    console.error("Error fetching selected students:", err);
+    res.status(500).json({ error: "Failed to fetch selected students" });
   }
 });
 
-
-// app.post("/api/students", async (req, res) => {
-//   console.log("Received request to add student");
-//   const { name, address, gender, dob, phone, branch } = req.body;
-//   try {
-//     const student = new Student({ name, address, gender, dob, phone, branch });
-//     await student.save();
-//     res.status(201).json(student);
-//     console.log("Student added successfully");
-//   } catch (err) {
-//     console.error("Error adding student:", err);
-//     res.status(400).json({ message: err.message });
-//   }
-// });
-
-// app.post("/api/selectStudent/:id", async (req, res) => {
-//   const { id } = req.params;
-//   try {
-//     const selectedStudent = await Student.findByIdAndUpdate(
-//       id,
-//       { selected: true },
-//       { new: true }
-//     );
-//     if (!selectedStudent) {
-//       return res.status(404).json({ error: "Student not found" });
-//     }
-//     res.json(selectedStudent);
-//   } catch (error) {
-//     console.error("Error selecting student:", error);
-//     res.status(500).json({ error: "Failed to select student" });
-//   }
-// });
-
-// app.get("/api/selectedStudents", async (req, res) => {
-//   try {
-//     const selectedStudents = await Student.find({ selected: true });
-//     res.json(selectedStudents);
-//   } catch (err) {
-//     console.error("Error fetching selected students:", err);
-//     res.status(500).json({ error: "Failed to fetch selected students" });
-//   }
-// });
-
-// // Route to fetch all students
-// app.get("/api/students", async (req, res) => {
-//   console.log("Received request to fetch students");
-//   try {
-//     const students = await Student.find();
-//     res.json(students);
-//     console.log("Students fetched successfully");
-//   } catch (err) {
-//     console.error("Error fetching students:", err);
-//     res.status(500).json({ message: err.message });
-//   }
-// });
+// Route to fetch all students
+app.get("/api/students", async (req, res) => {
+  console.log("Received request to fetch students");
+  try {
+    const students = await Student.find();
+    res.json(students);
+    console.log("Students fetched successfully");
+  } catch (err) {
+    console.error("Error fetching students:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // HOD Routes
 app.get("/api/hods", async (req, res) => {
